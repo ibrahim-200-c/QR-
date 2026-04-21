@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ebt Smart QR System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <style>
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background-color: #071022; 
+            margin: 0; 
+            padding: 20px; 
+            color: white;
+            display: flex;
+            justify-content: center;
+        }
+        .main-container { 
+            width: 100%;
+            max-width: 700px; 
+            background: #1e293b; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6); 
+        }
+        h2 { text-align: center; color: #34a853; margin-bottom: 25px; }
+        h3 {text-align:center; color: white; margin-bottom: 25px;}
+        
+        .tabs { 
+            display: flex; 
+            justify-content: center; 
+            margin-bottom: 25px; 
+            gap: 15px;
+        }
+        .tab-btn { 
+            padding: 10px 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border: 2px solid white; 
+            background: none; 
+            font-size: 16px; 
+            color: white; 
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active { 
+            background-color:#34a853 ; 
+            color: white; 
+        }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+
+        
+        .label-text { color: #cbd5e1; font-size: 14px; margin: 15px 0 5px; display: block; }
+        input, textarea, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border: none; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 15px; 
+            background-color: white; 
+            color: black; 
+        }
+        textarea { height: 180px; resize: vertical; }
+        
+        
+        .btn { 
+            width: 100%; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 17px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 10px;
+            color: white;
+            background-color: #34a853;
+        }
+        .btn:hover { background-color: #2d8f47; }
+        
+        
+        #qrcode-res { 
+            margin-top: 30px; 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center; 
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px dashed #ffffff;
+        }
+        #qrcode { 
+            display: inline-block;
+            padding: 15px; 
+            background: white; 
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: 3px solid #34a853; background: black; }
+        .result-box { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 15px; text-align: left; }
+        .word-count { text-align: right; font-size: 13px; font-weight: bold; color: #ff4757; margin-top: -5px; margin-bottom: 10px; }
+        
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <h2>EBT Smart QR System </h2>
+    <h3> Make Your Own QR </h3>
+    
+    <div class="tabs">
+        <button id="gen-tab-btn" class="tab-btn active" onclick="openTab('generator')">Generator</button>
+        <button id="scan-tab-btn" class="tab-btn" onclick="openTab('scanner')">Scanner</button>
+    </div>
+
+    <div id="generator" class="section active">
+        <span class="label-text">WiFi Configuration (Optional)</span>
+        <input type="text" id="ssid" placeholder="WiFi Name (SSID)">
+        <input type="text" id="wifi_pass" placeholder="WiFi Password">
+        <select id="encryption">
+            <option value="WPA">WPA/WPA2 (Modern)</option>
+            <option value="WEP">WEP (Old)</option>
+            <option value="nopass">No Password (Open)</option>
+        </select>
+        
+        <span class="label-text">Personal Details & Bio</span>
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="text" id="phone" placeholder="Mobile Number">
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="text" id="password" placeholder="Secret Key / Password">
+        
+        <textarea id="story" placeholder="Write your story (Up to 3000 words)..." oninput="updateWords()"></textarea>
+        <div id="wordCount" class="word-count">Words: 0 / 3000</div>
+        
+        <button class="btn" onclick="generateQR()">Create Smart QR Code</button>
+        
+        <div id="qrcode-res">
+            <div id="qrcode"></div>
+            <button id="dl-btn" style="width: auto; padding: 12px 40px;" class="btn" onclick="downloadQR()">Download QR Image</button>
+        </div>
+    </div>
+
+    <div id="scanner" class="section">
+        <p style="text-align:center; color: #cbd5e1; margin-bottom: 15px;">Point camera at any QR code to scan</p>
+        <div id="reader"></div>
+        <div id="scan-result" style="display:none;">
+            <h4 style="margin-bottom: 8px;">Scanned Content:</h4>
+            <div class="result-box" id="scanned-text"></div>
+            <button class="btn" onclick="restartScanner()">Scan Again</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    function openTab(tabName) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        
+        if(tabName === 'generator') {
+            document.getElementById('gen-tab-btn').classList.add('active');
+            stopScanner();
+        } else {
+            document.getElementById('scan-tab-btn').classList.add('active');
+            startScanner();
+        }
+    }
+
+    
+    function updateWords() {
+        const text = document.getElementById('story').value.trim();
+        const count = text === "" ? 0 : text.split(/\s+/).length;
+        const countDisplay = document.getElementById('wordCount');
+        countDisplay.innerText = `Words: ${count} / 3000`;
+        
+        if(count > 3000) countDisplay.style.color = "#ff4757";
+        else countDisplay.style.color = "#cbd5e1";
+        
+        return count;
+    }
+
+    
+    function generateQR() {
+        if (updateWords() > 3000) return alert("Word limit exceeded! Please keep it under 3000.");
+        
+        const ssid = document.getElementById('ssid').value.trim();
+        const w_pass = document.getElementById('wifi_pass').value.trim();
+        const enc = document.getElementById('encryption').value;
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value.trim();
+        const story = document.getElementById('story').value.trim();
+
+        let finalData = "";
+
+        
+        if (ssid !== "") {
+            finalData += `WIFI:T:${enc};S:${ssid};P:${w_pass};;`;
+        }
+
+        
+        if (name || phone || email || story || pass) {
+            if (finalData !== "") finalData += "\n\n";
+            finalData += `[USER PROFILE]\n`;
+            if (name) finalData += `Name: ${name}\n`;
+            if (phone) finalData += `Phone: ${phone}\n`;
+            if (email) finalData += `Email: ${email}\n`;
+            if (pass) finalData += `Key: ${pass}\n`;
+            if (story) finalData += `Bio: ${story}`;
+        }
+
+        if (finalData === "") return alert("Please enter at least some information!");
+
+        const qrContainer = document.getElementById('qrcode');
+        qrContainer.innerHTML = ""; 
+        
+        
+        new QRCode(qrContainer, {
+            text: finalData,
+            width: 280,
+            height: 280,
+            correctLevel : QRCode.CorrectLevel.L
+        });
+
+        document.getElementById('qrcode-res').style.display = "flex";
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    
+    function downloadQR() {
+        const canvas = document.querySelector('#qrcode canvas');
+        const link = document.createElement('a');
+        link.download = 'smart_system_qr.png';
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    }
+
+    
+    let scannerObj;
+    function startScanner() {
+        scannerObj = new Html5Qrcode("reader");
+        scannerObj.start(
+            { facingMode: "environment" }, 
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                document.getElementById('reader').style.display = 'none';
+                document.getElementById('scan-result').style.display = 'block';
+                document.getElementById('scanned-text').innerText = decodedText;
+                stopScanner();
+            }
+        ).catch(err => console.error("Camera Access Denied", err));
+    }
+
+    function stopScanner() {
+        if (scannerObj && scannerObj.isScanning) {
+            scannerObj.stop();
+        }
+    }
+
+    function restartScanner() {
+        document.getElementById('scan-result').style.display = 'none';
+        document.getElementById('reader').style.display = 'block';
+        startScanner();
+    }
+</script>
+
+</body>
+</html>
