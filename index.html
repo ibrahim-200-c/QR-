@@ -182,7 +182,7 @@
         const text = document.getElementById('story').value.trim();
         const count = text === "" ? 0 : text.split(/\s+/).length;
         const countDisplay = document.getElementById('wordCount');
-        countDisplay.innerText = `Words: ${count} / 3000`;
+        countDisplay.innerText = `Words: ${count} / 130`;
         
         if(count > 3000) countDisplay.style.color = "#ff4757";
         else countDisplay.style.color = "#cbd5e1";
