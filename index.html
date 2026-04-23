@@ -1,5 +1,6 @@
+
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,207 +8,241 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #071022; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .main-container { width: 100%; max-width: 600px; background: #1e293b; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { text-align: center; color: #34a853; margin-bottom: 20px; }
-        h3 { text-align: center; color:white; margin-bottom: 20px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #071022; color: white; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 600px; background: #1e293b; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
         .tab-btn { flex: 1; padding: 12px; cursor: pointer; border: 2px solid #34a853; background: none; color: white; border-radius: 10px; font-weight: bold; }
         .tab-btn.active { background: #34a853; }
-
         .section { display: none; }
         .section.active { display: block; }
-
-        .label-text { color: #34a853; font-size: 12px; font-weight: bold; margin: 15px 0 5px; display: block; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: none; font-size: 15px; box-sizing: border-box; color: #000; }
-        
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px; color: white; transition: 0.3s; }
+        .label-text { color: #34a853; font-size: 11px; font-weight: bold; margin: 10px 0 4px; display: block; text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: none; font-size: 14px; box-sizing: border-box; outline: none; }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; margin-top: 10px; }
         .p-btn { background: #34a853; }
         .w-btn { background: #1a73e8; }
         .l-btn { background: #ea4335; }
-        
-        .qr-output { display: none; flex-direction: column; align-items: center; margin-top: 15px; padding: 15px; background: white; border-radius: 12px; }
-        .dl-btn { background: #071022; margin-top: 10px; width: auto; padding: 8px 20px; font-size: 14px; }
-
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #34a853; margin-top: 10px; }
+        .qr-output { display: none; flex-direction: column; align-items: center; margin-top: 20px; padding: 15px; background: white; border-radius: 15px; }
+        #reader { width: 100%; border-radius: 12px; border: 2px solid #34a853; margin-top: 10px; overflow: hidden; }
         .result-box { display: none; margin-top: 20px; background: white; color: black; padding: 15px; border-radius: 10px; }
-        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #94a3b8; border-top: 1px solid #475569; padding-top: 10px; width: 100%; }
+        canvas { display: none; } /* Hidden canvas for processing download */
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <h2>Ebt Smart QR System</h2>
-    <h3>Make Your Own Qr</h3>
-    
+<div class="container">
+    <h2 style="text-align:center; color:#34a853; margin:0 0 20px 0;">Ebt Smart QR System</h2>
+    <h3 style="text-align:center; color:white; margin:0 0 20px 0;">Make Your Own QR </h3>
     <div class="tabs">
-        <button id="tab1" class="tab-btn active" onclick="showTab('gen')">Generate</button>
-        <button id="tab2" class="tab-btn" onclick="showTab('scan')">Scanner</button>
+        <button id="tab1" class="tab-btn active" onclick="showTab('gen')">QR Generator</button>
+        <button id="tab2" class="tab-btn" onclick="showTab('scan')">QR Scanner</button>
     </div>
 
     <div id="gen-section" class="section active">
-        
-        <span class="label-text">👤 Personal Identity</span>
-        <input type="text" id="p_name" placeholder="Full Name">
-        <input type="text" id="p_phone" placeholder="Mobile Number">
-        
-        <span class="label-text">🆔 Identity Type</span>
-        <select id="p_id_type">
-            <option value="NID">National ID (NID)</option>
-            <option value="Birth Cert">Birth Certificate</option>
-        </select>
-        <input type="text" id="p_id_val" placeholder="Enter ID Number">
+        <div style="border: 1px solid #334155; padding: 15px; border-radius: 15px; margin-bottom: 15px; background: #0f172a;">
+            <h4 style="color:#34a853; margin:0 0 10px 0;">1. Personal Digital Profile</h4>
+            <span class="label-text">Full Name :</span>
+            <input type="text" id="p_name" placeholder="Full Name">
+            <div class="row">
+                <div class="col"><span class="label-text">Mother:</span><input type="text" id="p_mname"></div>
+                <div class="col"><span class="label-text">Father:</span><input type="text" id="p_fname"></div>
+            </div>
+            <div class="row">
+                <div class="col"><span class="label-text">Mobile:</span><input type="text" id="p_phone"></div>
+                <div class="col"><span class="label-text">Email:</span><input type="email" id="p_gmail"></div>
+            </div>
+            <div class="row">
+                <div class="col"><span class="label-text">DOB:</span><input type="date" id="p_dob"></div>
+                <div class="col"><span class="label-text">Gender:</span><select id="p_gender"><option>Male</option><option>Female</option></select></div>
+            </div>
+            <div class="row">
+                <div class="col"><span class="label-text">ID Type:</span><select id="p_id_type"><option>NID</option><option>Birth Certificate</option></select></div>
+                <div class="col"><span class="label-text">ID Number:</span><input type="text" id="p_id_val"></div>
+            </div>
+            <div class="row">
+                <div class="col"><span class="label-text">Passport:</span><input type="text" id="p_passport"></div>
+                <div class="col"><span class="label-text">Driving License:</span><input type="text" id="p_license"></div>
+            </div>
+            <div class="row">
+                <div class="col"><span class="label-text">Education:</span><input type="text" id="p_edu" placeholder="e.g. SSC"></div>
+                <div class="col"><span class="label-text">Blood Group:</span><select id="p_blood"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+            </div>
+            <div class="row">
+                <div class="col"><span class="label-text">Profession:</span><input type="text" id="p_job"></div>
+                <div class="col"><span class="label-text">Nationality:</span><input type="text" id="p_nat" value="Bangladeshi"></div>
+            </div>
+            <span class="label-text">Country:</span><input type="text" id="p_country" placeholder="Country">
+            <span class="label-text">Present Address:</span><input type="text" id="p_pre">
+            <span class="label-text">Permanent Address:</span><input type="text" id="p_per">
 
-        <input type="text" id="p_addr" placeholder="Full Address">
-        
-        <button class="btn p-btn" onclick="genQR('personal')">Generate Personal QR</button>
-        <div id="res_personal" class="qr-output">
-            <div id="qr_personal"></div>
-            <button class="btn dl-btn" onclick="download('qr_personal')">💾 Download Personal QR</button>
+            <button class="btn p-btn" onclick="generateProfile()">Generate Web Profile QR</button>
+            <div id="p_loader" style="display:none; text-align:center; color:#fbbf24; margin:10px;">Connecting to Google...</div>
+            <div id="res_p" class="qr-output"><div id="qr_p"></div><button class="btn" style="background:#071022; width:auto;" onclick="downloadWithBorder('qr_p')">Download QR</button></div>
         </div>
 
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #475569;">
-
-        <span class="label-text">📶 WiFi Smart Connect</span>
-        <input type="text" id="w_ssid" placeholder="WiFi Name (SSID)">
-        <input type="text" id="w_pass" placeholder="WiFi Password">
-        <button class="btn w-btn" onclick="genQR('wifi')">Generate WiFi QR</button>
-        <div id="res_wifi" class="qr-output">
-            <div id="qr_wifi"></div>
-            <button class="btn dl-btn" onclick="download('qr_wifi')">💾 Download WiFi QR</button>
+        <div style="border: 1px solid #334155; padding: 15px; border-radius: 15px; margin-bottom: 15px; background: #0f172a;">
+            <h4 style="color:#1a73e8; margin:0 0 10px 0;">2. WiFi QR (Smart Connect)</h4>
+            <span class="label-text">WiFi Name:</span><input type="text" id="w_ssid">
+            <span class="label-text">Password:</span><input type="text" id="w_pass">
+            <button class="btn w-btn" onclick="generateWiFi()">Generate WiFi QR</button>
+            <div id="res_w" class="qr-output"><div id="qr_w"></div><button class="btn" style="background:#071022; width:auto;" onclick="downloadWithBorder('qr_w')">Download QR</button></div>
         </div>
 
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #475569;">
-
-        <span class="label-text">🌐 Web URL Link</span>
-        <input type="url" id="l_url" placeholder="https://example.com">
-        <button class="btn l-btn" onclick="genQR('link')">Generate Link QR</button>
-        <div id="res_link" class="qr-output">
-            <div id="qr_link"></div>
-            <button class="btn dl-btn" onclick="download('qr_link')">💾 Download Link QR</button>
+        <div style="border: 1px solid #334155; padding: 15px; border-radius: 15px; background: #0f172a;">
+            <h4 style="color:#ea4335; margin:0 0 10px 0;">3. Quick Web Link</h4>
+            <span class="label-text">Paste Link:</span><input type="url" id="l_url" placeholder="https://">
+            <button class="btn l-btn" onclick="generateLink()">Generate Link QR</button>
+            <div id="res_l" class="qr-output"><div id="qr_l"></div><button class="btn" style="background:#071022; width:auto;" onclick="downloadWithBorder('qr_l')">Download QR</button></div>
         </div>
     </div>
 
     <div id="scan-section" class="section">
-        <span class="label-text">📁 Upload QR Image</span>
-        <input type="file" id="file-input" accept="image/*" style="background: #1e293b; color: white; padding: 10px; width: 100%; border-radius: 8px;">
+        <span class="label-text">Gallery Upload:</span>
+        <input type="file" id="file_in" accept="image/*" style="background:white; color:black; padding:8px; margin-bottom:15px; border-radius:5px;">
         <div id="reader"></div>
-        <div id="res-box" class="result-box">
-            <h4 style="margin:0 0 10px 0; color: #34a853;">Scanned Result:</h4>
-            <p id="res-text" style="word-break: break-all; white-space: pre-wrap; font-weight: bold;"></p>
-            <div id="scan-action"></div>
-            <button class="btn" style="background:#071022" onclick="resetScanner()">Scan Another</button>
+        <div id="res_box" class="result-box">
+            <h4 style="margin:0 0 10px 0; color:#34a853;">Scan Result:</h4>
+            <p id="res_text" style="word-break: break-all; font-weight: bold; margin-bottom:15px;"></p>
+            <div id="action_btn_container"></div>
+            <button class="btn" style="background:#071022" onclick="resetScanner()">Scan Again</button>
         </div>
-    </div>
-
-    <div class="footer">
-        Designed by <strong>Md Ibrahim Khalil</strong> | &copy; 2026 <strong>EInbrainton</strong>
     </div>
 </div>
 
 <script>
+    
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_5FHlnBzjcewDJtjdGW3kKQHS1fwGNtzc5uNd9tIQ5zbHMgX3UmqztRgZtp3nlR4h/exec";
+
     function showTab(type) {
         document.getElementById('gen-section').classList.toggle('active', type === 'gen');
         document.getElementById('scan-section').classList.toggle('active', type === 'scan');
         document.getElementById('tab1').classList.toggle('active', type === 'gen');
         document.getElementById('tab2').classList.toggle('active', type === 'scan');
-        if(type === 'scan') startCam(); else stopCam();
+        if(type === 'scan') startScanner(); else stopScanner();
     }
 
-    function genQR(type) {
-        let content = "";
-        let targetDiv = "";
-        let resArea = "";
+    
+    async function generateProfile() {
+        const inputs = document.querySelectorAll('#gen-section input');
+        let hasData = false;
+        inputs.forEach(i => { if(i.value.trim().length > 0) hasData = true; });
+        if(!hasData) return alert("Please write at least one character!");
 
-        if(type === 'personal') {
-            const name = document.getElementById('p_name').value.trim();
-            const phone = document.getElementById('p_phone').value.trim();
-            const idType = document.getElementById('p_id_type').value;
-            const idVal = document.getElementById('p_id_val').value.trim();
-            const addr = document.getElementById('p_addr').value.trim();
+        document.getElementById('p_loader').style.display = 'block';
+        const data = {
+            name: document.getElementById('p_name').value || "N/A",
+            mName: document.getElementById('p_mname').value || "N/A",
+            fName: document.getElementById('p_fname').value || "N/A",
+            phone: document.getElementById('p_phone').value || "N/A",
+            gmail: document.getElementById('p_gmail').value || "N/A",
+            dob: document.getElementById('p_dob').value || "N/A",
+            idType: document.getElementById('p_id_type').value,
+            idVal: document.getElementById('p_id_val').value || "N/A",
+            passport: document.getElementById('p_passport').value || "N/A",
+            gender: document.getElementById('p_gender').value,
+            blood: document.getElementById('p_blood').value,
+            edu: document.getElementById('p_edu').value || "N/A",
+            job: document.getElementById('p_job').value || "N/A",
+            license: document.getElementById('p_license').value || "N/A",
+            country: document.getElementById('p_country').value || "N/A",
+            nationality: document.getElementById('p_nat').value || "N/A",
+            preAddr: document.getElementById('p_pre').value || "N/A",
+            perAddr: document.getElementById('p_per').value || "N/A"
+        };
 
-            if(name) content += `Name: ${name}\n`;
-            if(phone) content += `Phone: ${phone}\n`;
-            if(idVal) content += `${idType}: ${idVal}\n`;
-            if(addr) content += `Address: ${addr}`;
-
-            targetDiv = "qr_personal"; resArea = "res_personal";
-        } 
-        else if(type === 'wifi') {
-            let s = document.getElementById('w_ssid').value.trim();
-            let p = document.getElementById('w_pass').value.trim();
-            if(s || p) content = `WIFI:S:${s};T:WPA;P:${p};;`;
-            targetDiv = "qr_wifi"; resArea = "res_wifi";
-        }
-        else if(type === 'link') {
-            content = document.getElementById('l_url').value.trim();
-            targetDiv = "qr_link"; resArea = "res_link";
-        }
-
-        if(!content.trim()) return alert("Please write at least one character!");
-
-        document.getElementById(targetDiv).innerHTML = "";
-        new QRCode(document.getElementById(targetDiv), { 
-            text: unescape(encodeURIComponent(content)), 
-            width: 220, 
-            height: 220,
-            correctLevel: QRCode.CorrectLevel.L // Low density for faster scanning
-        });
-        document.getElementById(resArea).style.display = "flex";
-        document.getElementById(resArea).scrollIntoView({behavior: 'smooth'});
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+            const json = await res.json();
+            createQR("qr_p", json.url);
+            document.getElementById('res_p').style.display = 'flex';
+        } catch(e) { alert("Network Error!"); }
+        finally { document.getElementById('p_loader').style.display = 'none'; }
     }
 
-    function download(divId) {
-        const canvas = document.querySelector(`#${divId} canvas`);
-        if(!canvas) return;
+    function generateWiFi() {
+        const ssid = document.getElementById('w_ssid').value.trim();
+        if(!ssid) return alert("WiFi Name required!");
+        const pass = document.getElementById('w_pass').value.trim();
+        createQR("qr_w", `WIFI:S:${ssid};T:WPA;P:${pass};;`);
+        document.getElementById('res_w').style.display = 'flex';
+    }
+
+    function generateLink() {
+        const url = document.getElementById('l_url').value.trim();
+        if(!url) return alert("URL required!");
+        createQR("qr_l", url);
+        document.getElementById('res_l').style.display = 'flex';
+    }
+
+    function createQR(divId, text) {
+        document.getElementById(divId).innerHTML = "";
+        new QRCode(document.getElementById(divId), { text: text, width: 250, height: 250 });
+    }
+
+
+    function downloadWithBorder(divId) {
+        const qrCanvas = document.querySelector(`#${divId} canvas`);
+        const finalCanvas = document.createElement('canvas');
+        const ctx = finalCanvas.getContext('2d');
+        const padding = 40; 
+
+        finalCanvas.width = qrCanvas.width + padding * 2;
+        finalCanvas.height = qrCanvas.height + padding * 2;
+
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+        
+        ctx.drawImage(qrCanvas, padding, padding);
+
         const link = document.createElement('a');
-        link.download = `Ebt_SmartQR.png`;
-        link.href = canvas.toDataURL();
+        link.download = 'Ebt_QR_Code.png';
+        link.href = finalCanvas.toDataURL();
         link.click();
     }
 
-    let scanner;
-    function startCam() {
-        if(!scanner) scanner = new Html5Qrcode("reader");
-        scanner.start({facingMode: "environment"}, {fps: 10, qrbox: 250}, text => handleScan(text)).catch(()=>{});
+    
+    let html5QrCode;
+    function startScanner() {
+        if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({facingMode: "environment"}, {fps: 10, qrbox: 250}, text => {
+            handleResult(text);
+            stopScanner();
+        }).catch(()=>{});
     }
-    function stopCam() { if(scanner && scanner.isScanning) scanner.stop(); }
+    function stopScanner() { if(html5QrCode && html5QrCode.isScanning) html5QrCode.stop(); }
 
-    document.getElementById('file-input').addEventListener('change', e => {
-        const file = e.target.files[0];
-        if(!file) return;
-        new Html5Qrcode("reader").scanFile(file, true).then(text => handleScan(text)).catch(()=>alert("QR can't be read!"));
-    });
-
-    function handleScan(text) {
-        stopCam();
+    function handleResult(text) {
         document.getElementById('reader').style.display = 'none';
-        document.getElementById('res-box').style.display = 'block';
-        document.getElementById('res-text').innerText = text;
+        document.getElementById('res_box').style.display = 'block';
+        document.getElementById('res_text').innerText = text;
+        const btnContainer = document.getElementById('action_btn_container');
+        btnContainer.innerHTML = "";
+
         
-        const action = document.getElementById('scan-action');
-        action.innerHTML = "";
-        
-        if(text.toLowerCase().startsWith("http")) {
-            const b = document.createElement('button');
-            b.className = "btn l-btn";
-            b.innerText = "🌐 Open Website Link";
-            b.onclick = () => window.open(text, '_blank');
-            action.appendChild(b);
-        } else if(text.startsWith("WIFI:")) {
-            const b = document.createElement('button');
-            b.className = "btn w-btn";
-            b.innerText = "📶 Connect to WiFi";
-            action.appendChild(b);
+        if(text.startsWith("http")) {
+            const openBtn = document.createElement('button');
+            openBtn.className = "btn l-btn";
+            openBtn.innerText = "🌐 Open Profile / Link";
+            openBtn.onclick = () => window.open(text, '_blank');
+            btnContainer.appendChild(openBtn);
         }
     }
 
     function resetScanner() {
-        document.getElementById('res-box').style.display = 'none';
+        document.getElementById('res_box').style.display = 'none';
         document.getElementById('reader').style.display = 'block';
-        startCam();
+        startScanner();
     }
-</script>
 
+    document.getElementById('file_in').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const qrTemp = new Html5Qrcode("reader");
+        qrTemp.scanFile(file, true).then(text => handleResult(text)).catch(() => alert("No QR found!"));
+    });
+</script>
 </body>
 </html>
