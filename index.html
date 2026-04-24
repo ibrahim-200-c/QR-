@@ -193,44 +193,72 @@
 
     
     
+
+
 let scanner = new Html5Qrcode("reader");
 
-function startScanner() {
-    const config = { 
-        fps: 15, 
-        qrbox: { width: 250, height: 250 },
+function showTab(type) {
+    document.getElementById('gen-section').classList.toggle('active', type === 'gen');
+    document.getElementById('scan-section').classList.toggle('active', type === 'scan');
+    document.getElementById('t1').classList.toggle('active', type === 'gen');
+    document.getElementById('t2').classList.toggle('active', type === 'scan');
+
+    if(type === 'scan') {
+
+        startScanner();
+    } else {
         
-        experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true 
+        if(scanner.isScanning) {
+            scanner.stop().catch(err => console.log("Stop error"));
         }
-    };
+    }
+}
+
+async function startScanner() {
+
+    document.getElementById('reader').style.display = 'block';
+    document.getElementById('res_box').style.display = 'none';
     
-    scanner.start({ facingMode: "environment" }, config, t => handleResult(t))
-    .catch(err => console.error("Camera error:", err));
+    const config = { 
+        fps: 20, 
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0 
+    };
+
+    try {
+        await scanner.start({ facingMode: "environment" }, config, t => handleResult(t));
+    } catch (err) {
+        console.error("Camera start error:", err);
+    }
 }
 
 
-document.getElementById('file_in').addEventListener('change', e => {
+document.getElementById('file_in').addEventListener('change', async e => {
     if (e.target.files.length === 0) return;
     
     const file = e.target.files[0];
+
     
+    if (scanner.isScanning) {
+        await scanner.stop();
+    }
+
     
     scanner.scanFile(file, true)
     .then(text => {
         handleResult(text);
     })
     .catch(err => {
-        console.error(err);
-        
-        alert("কিউআর কোড পাওয়া যায়নি। ছবিটা একটু পরিষ্কার করে তুলে আবার চেষ্টা করো অথবা ক্যামেরা দিয়ে সরাসরি স্ক্যান করো।");
+        alert("কিউআর কোড পাওয়া যায়নি! দয়া করে পরিষ্কার ছবি আপলোড দিন।");
+
+        startScanner();
     });
 });
 
 function handleResult(text) {
     
-    if(scanner.isScanning) {
-        scanner.stop().catch(err => console.error(err));
+    if (scanner.isScanning) {
+        scanner.stop().catch(e => console.log(e));
     }
     
     document.getElementById('reader').style.display = 'none';
@@ -238,7 +266,7 @@ function handleResult(text) {
     document.getElementById('res_text').innerText = text;
     
     const act = document.getElementById('scan_action');
-    act.innerHTML = ""; 
+    act.innerHTML = "";
 
     
     if (text.toLowerCase().startsWith("http") || text.toLowerCase().startsWith("www")) {
