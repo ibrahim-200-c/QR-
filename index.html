@@ -72,6 +72,17 @@
                 <div class="col"><span class="label-text">Profession:</span><input type="text" id="p_job"></div>
                 <div class="col"><span class="label-text">Nationality:</span><input type="text" id="p_nat" value="Bangladeshi"></div>
             </div>
+            <span class="label-text">Country :</span>
+            <select id="p_country">
+                <option value="Bangladesh">Bangladesh</option>
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+                <option value="UK">UK</option>
+                <option value="Canada">Canada</option>
+                <option value="Saudi Arabia">Saudi Arabia</option>
+                <option value="UAE">UAE</option>
+                <option value="Others">Others</option>
+            </select>
             <span class="label-text">Present Address:</span><input type="text" id="p_pre">
             <span class="label-text">Permanent Address:</span><input type="text" id="p_per">
 
@@ -156,6 +167,7 @@
             edu: document.getElementById('p_edu').value.trim() || " ",
             job: document.getElementById('p_job').value.trim() || " ",
             nationality: document.getElementById('p_nat').value.trim() || " ",
+            country: document.getElementById('p_country').value, // Country Data Added
             preAddr: document.getElementById('p_pre').value.trim() || " ",
             perAddr: document.getElementById('p_per').value.trim() || " "
         };
