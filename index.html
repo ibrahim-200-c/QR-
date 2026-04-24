@@ -1,49 +1,49 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ebt Smart QR System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #071022; color: white; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 600px; background: #1e293b; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #071022; color: white; padding: 10px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        .container { width: 100%; max-width: 600px; background: #1e293b; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
         .tab-btn { flex: 1; padding: 12px; cursor: pointer; border: 2px solid #34a853; background: none; color: white; border-radius: 10px; font-weight: bold; }
         .tab-btn.active { background: #34a853; }
         .section { display: none; }
         .section.active { display: block; }
         .label-text { color: #34a853; font-size: 11px; font-weight: bold; margin: 10px 0 4px; display: block; text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: none; font-size: 14px; box-sizing: border-box; outline: none; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: none; font-size: 14px; box-sizing: border-box; outline: none; background: white; color: black; }
         .row { display: flex; gap: 10px; }
         .col { flex: 1; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; margin-top: 10px; }
         .p-btn { background: #34a853; }
         .w-btn { background: #1a73e8; }
         .l-btn { background: #ea4335; }
-        .qr-output { display: none; flex-direction: column; align-items: center; margin-top: 20px; padding: 15px; background: white; border-radius: 15px; }
-        #reader { width: 100%; border-radius: 12px; border: 2px solid #34a853; margin-top: 10px; overflow: hidden; }
-        .result-box { display: none; margin-top: 20px; background: white; color: black; padding: 15px; border-radius: 10px; }
-        canvas { display: none; } /* Hidden canvas for processing download */
+        .qr-output { display: none; flex-direction: column; align-items: center; margin-top: 20px; padding: 20px; background: white; border-radius: 15px; }
+        .qr-output img { width: 250px; height: 250px; border: 1px solid #eee; display: block; }
+        #reader { width: 100%; border-radius: 12px; border: 2px solid #34a853; margin-top: 10px; overflow: hidden; background: black; }
+        .result-box { display: none; margin-top: 20px; background: white; color: black; padding: 15px; border-radius: 10px; text-align: center; }
+        #loader { display: none; text-align: center; color: #fbbf24; margin: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color:#34a853; margin:0 0 20px 0;">Ebt Smart QR System</h2>
-    <h3 style="text-align:center; color:white; margin:0 0 20px 0;">Make Your Own QR </h3>
+    <h2 style="text-align:center; color:#34a853; margin-bottom:15px;">Ebt Smart QR System</h2>
+    <h3 style="text-align:center; color:white; margin-bottom:15px;">Make Your Own QR</h3>
+    
     <div class="tabs">
-        <button id="tab1" class="tab-btn active" onclick="showTab('gen')">QR Generator</button>
-        <button id="tab2" class="tab-btn" onclick="showTab('scan')">QR Scanner</button>
+        <button id="t1" class="tab-btn active" onclick="showTab('gen')">QR Generator</button>
+        <button id="t2" class="tab-btn" onclick="showTab('scan')">QR Scanner</button>
     </div>
 
     <div id="gen-section" class="section active">
+        
         <div style="border: 1px solid #334155; padding: 15px; border-radius: 15px; margin-bottom: 15px; background: #0f172a;">
-            <h4 style="color:#34a853; margin:0 0 10px 0;">1. Personal Digital Profile</h4>
-            <span class="label-text">Full Name :</span>
-            <input type="text" id="p_name" placeholder="Full Name">
+            <h4 style="color:#34a853; margin:0 0 10px 0;">1. Personal Profile (Sync to Sheet)</h4>
+            <span class="label-text">Full Name :</span><input type="text" id="p_name">
             <div class="row">
                 <div class="col"><span class="label-text">Mother:</span><input type="text" id="p_mname"></div>
                 <div class="col"><span class="label-text">Father:</span><input type="text" id="p_fname"></div>
@@ -65,184 +65,192 @@
                 <div class="col"><span class="label-text">Driving License:</span><input type="text" id="p_license"></div>
             </div>
             <div class="row">
-                <div class="col"><span class="label-text">Education:</span><input type="text" id="p_edu" placeholder="e.g. SSC"></div>
+                <div class="col"><span class="label-text">Education:</span><input type="text" id="p_edu" placeholder="e.g. HSC"></div>
                 <div class="col"><span class="label-text">Blood Group:</span><select id="p_blood"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
             </div>
             <div class="row">
                 <div class="col"><span class="label-text">Profession:</span><input type="text" id="p_job"></div>
                 <div class="col"><span class="label-text">Nationality:</span><input type="text" id="p_nat" value="Bangladeshi"></div>
             </div>
-            <span class="label-text">Country:</span><input type="text" id="p_country" placeholder="Country">
             <span class="label-text">Present Address:</span><input type="text" id="p_pre">
             <span class="label-text">Permanent Address:</span><input type="text" id="p_per">
 
-            <button class="btn p-btn" onclick="generateProfile()">Generate Web Profile QR</button>
-            <div id="p_loader" style="display:none; text-align:center; color:#fbbf24; margin:10px;">Connecting to Google...</div>
-            <div id="res_p" class="qr-output"><div id="qr_p"></div><button class="btn" style="background:#071022; width:auto;" onclick="downloadWithBorder('qr_p')">Download QR</button></div>
+            <button class="btn p-btn" onclick="generateProfile()">Save Data & Get QR</button>
+            <div id="loader">Saving to Google Sheet...</div>
+            <div id="res_p" class="qr-output"><div id="qr_p"></div><button class="btn" style="background:#071022" onclick="saveQR('qr_p')">Open / Save QR</button></div>
         </div>
 
         <div style="border: 1px solid #334155; padding: 15px; border-radius: 15px; margin-bottom: 15px; background: #0f172a;">
-            <h4 style="color:#1a73e8; margin:0 0 10px 0;">2. WiFi QR (Smart Connect)</h4>
-            <span class="label-text">WiFi Name:</span><input type="text" id="w_ssid">
+            <h4 style="color:#1a73e8; margin:0 0 10px 0;">2. WiFi QR</h4>
+            <span class="label-text">WiFi Name (SSID):</span><input type="text" id="w_ssid">
             <span class="label-text">Password:</span><input type="text" id="w_pass">
-            <button class="btn w-btn" onclick="generateWiFi()">Generate WiFi QR</button>
-            <div id="res_w" class="qr-output"><div id="qr_w"></div><button class="btn" style="background:#071022; width:auto;" onclick="downloadWithBorder('qr_w')">Download QR</button></div>
+            <button class="btn w-btn" onclick="genWiFi()">Generate WiFi QR</button>
+            <div id="res_w" class="qr-output"><div id="qr_w"></div><button class="btn" style="background:#071022" onclick="saveQR('qr_w')">Save QR</button></div>
         </div>
 
         <div style="border: 1px solid #334155; padding: 15px; border-radius: 15px; background: #0f172a;">
-            <h4 style="color:#ea4335; margin:0 0 10px 0;">3. Quick Web Link</h4>
-            <span class="label-text">Paste Link:</span><input type="url" id="l_url" placeholder="https://">
-            <button class="btn l-btn" onclick="generateLink()">Generate Link QR</button>
-            <div id="res_l" class="qr-output"><div id="qr_l"></div><button class="btn" style="background:#071022; width:auto;" onclick="downloadWithBorder('qr_l')">Download QR</button></div>
+            <h4 style="color:#ea4335; margin:0 0 10px 0;">3. Website Link QR</h4>
+            <span class="label-text">Enter URL:</span><input type="url" id="l_url" placeholder="https://example.com">
+            <button class="btn l-btn" onclick="genLink()">Generate Link QR</button>
+            <div id="res_l" class="qr-output"><div id="qr_l"></div><button class="btn" style="background:#071022" onclick="saveQR('qr_l')">Save QR</button></div>
         </div>
     </div>
 
     <div id="scan-section" class="section">
-        <span class="label-text">Gallery Upload:</span>
-        <input type="file" id="file_in" accept="image/*" style="background:white; color:black; padding:8px; margin-bottom:15px; border-radius:5px;">
+        <span class="label-text">Scan from Gallery / Camera:</span>
+        <input type="file" id="file_in" accept="image/*" style="background:none; color:white;">
         <div id="reader"></div>
         <div id="res_box" class="result-box">
-            <h4 style="margin:0 0 10px 0; color:#34a853;">Scan Result:</h4>
-            <p id="res_text" style="word-break: break-all; font-weight: bold; margin-bottom:15px;"></p>
-            <div id="action_btn_container"></div>
-            <button class="btn" style="background:#071022" onclick="resetScanner()">Scan Again</button>
+            <h4>Result:</h4>
+            <p id="res_text" style="word-break: break-all;"></p>
+            <div id="scan_action"></div>
+            <button class="btn" style="background:#071022" onclick="location.reload()">Scan New</button>
         </div>
     </div>
 </div>
 
 <script>
-    
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeXCB562_nygLF3j2vVWBNBxp_OJM8Sjbg4Z-ZHga0C_Vq5puIMGOl6zX7G2LXS-NO/exec";
 
     function showTab(type) {
         document.getElementById('gen-section').classList.toggle('active', type === 'gen');
         document.getElementById('scan-section').classList.toggle('active', type === 'scan');
-        document.getElementById('tab1').classList.toggle('active', type === 'gen');
-        document.getElementById('tab2').classList.toggle('active', type === 'scan');
-        if(type === 'scan') startScanner(); else stopScanner();
+        document.getElementById('t1').classList.toggle('active', type === 'gen');
+        document.getElementById('t2').classList.toggle('active', type === 'scan');
+        if(type === 'scan') startScanner();
     }
 
-    
-    async function generateProfile() {
-        const inputs = document.querySelectorAll('#gen-section input');
-        let hasData = false;
-        inputs.forEach(i => { if(i.value.trim().length > 0) hasData = true; });
-        if(!hasData) return alert("Please write at least one character!");
+    function makeQR(divId, text) {
+        const container = document.getElementById(divId);
+        const encoded = encodeURIComponent(text);
+        
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encoded}&size=300x300&margin=4`;
+        
+        const img = new Image();
+        img.id = `img_${divId}`;
+        img.src = qrUrl;
+        img.onload = () => {
+            container.innerHTML = "";
+            container.appendChild(img);
+            container.parentElement.style.display = 'flex';
+        };
+    }
 
-        document.getElementById('p_loader').style.display = 'block';
+    async function generateProfile() {
+        const loader = document.getElementById('loader');
+        const resDiv = document.getElementById('res_p');
+        
         const data = {
-            name: document.getElementById('p_name').value || "N/A",
-            mName: document.getElementById('p_mname').value || "N/A",
-            fName: document.getElementById('p_fname').value || "N/A",
-            phone: document.getElementById('p_phone').value || "N/A",
-            gmail: document.getElementById('p_gmail').value || "N/A",
-            dob: document.getElementById('p_dob').value || "N/A",
+            name: document.getElementById('p_name').value.trim() || " ",
+            mName: document.getElementById('p_mname').value.trim() || " ",
+            fName: document.getElementById('p_fname').value.trim() || " ",
+            phone: document.getElementById('p_phone').value.trim() || " ",
+            gmail: document.getElementById('p_gmail').value.trim() || " ",
+            dob: document.getElementById('p_dob').value || " ",
             idType: document.getElementById('p_id_type').value,
-            idVal: document.getElementById('p_id_val').value || "N/A",
-            passport: document.getElementById('p_passport').value || "N/A",
+            idVal: document.getElementById('p_id_val').value.trim() || " ",
+            passport: document.getElementById('p_passport').value.trim() || " ",
+            license: document.getElementById('p_license').value.trim() || " ",
             gender: document.getElementById('p_gender').value,
             blood: document.getElementById('p_blood').value,
-            edu: document.getElementById('p_edu').value || "N/A",
-            job: document.getElementById('p_job').value || "N/A",
-            license: document.getElementById('p_license').value || "N/A",
-            country: document.getElementById('p_country').value || "N/A",
-            nationality: document.getElementById('p_nat').value || "N/A",
-            preAddr: document.getElementById('p_pre').value || "N/A",
-            perAddr: document.getElementById('p_per').value || "N/A"
+            edu: document.getElementById('p_edu').value.trim() || " ",
+            job: document.getElementById('p_job').value.trim() || " ",
+            nationality: document.getElementById('p_nat').value.trim() || " ",
+            preAddr: document.getElementById('p_pre').value.trim() || " ",
+            perAddr: document.getElementById('p_per').value.trim() || " "
         };
 
+        
+        const check = Object.values(data).some(v => v !== " " && v !== "");
+        if(!check) return alert("Please fill at least one field!");
+
+        loader.style.display = 'block';
+        resDiv.style.display = 'none';
+
         try {
-            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
-            const json = await res.json();
-            createQR("qr_p", json.url);
-            document.getElementById('res_p').style.display = 'flex';
-        } catch(e) { alert("Network Error!"); }
-        finally { document.getElementById('p_loader').style.display = 'none'; }
+            const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+            const result = await response.json();
+            if (result.url) makeQR("qr_p", result.url);
+        } catch (e) { alert("Sync Error! Check Script."); }
+        finally { loader.style.display = 'none'; }
     }
 
-    function generateWiFi() {
-        const ssid = document.getElementById('w_ssid').value.trim();
-        if(!ssid) return alert("WiFi Name required!");
-        const pass = document.getElementById('w_pass').value.trim();
-        createQR("qr_w", `WIFI:S:${ssid};T:WPA;P:${pass};;`);
-        document.getElementById('res_w').style.display = 'flex';
+    function genWiFi() {
+        const s = document.getElementById('w_ssid').value;
+        const p = document.getElementById('w_pass').value;
+        if(s) makeQR("qr_w", `WIFI:S:${s};T:WPA;P:${p};;`);
     }
 
-    function generateLink() {
-        const url = document.getElementById('l_url').value.trim();
-        if(!url) return alert("URL required!");
-        createQR("qr_l", url);
-        document.getElementById('res_l').style.display = 'flex';
+    function genLink() {
+        const u = document.getElementById('l_url').value;
+        if(u) makeQR("qr_l", u);
     }
 
-    function createQR(divId, text) {
-        document.getElementById(divId).innerHTML = "";
-        new QRCode(document.getElementById(divId), { text: text, width: 250, height: 250 });
-    }
-
-
-    function downloadWithBorder(divId) {
-        const qrCanvas = document.querySelector(`#${divId} canvas`);
-        const finalCanvas = document.createElement('canvas');
-        const ctx = finalCanvas.getContext('2d');
-        const padding = 40; 
-
-        finalCanvas.width = qrCanvas.width + padding * 2;
-        finalCanvas.height = qrCanvas.height + padding * 2;
-
-        
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-        
-        ctx.drawImage(qrCanvas, padding, padding);
-
-        const link = document.createElement('a');
-        link.download = 'Ebt_QR_Code.png';
-        link.href = finalCanvas.toDataURL();
-        link.click();
+    function saveQR(divId) {
+        const img = document.getElementById(`img_${divId}`);
+        if (img) window.open(img.src, '_blank');
     }
 
     
-    let html5QrCode;
-    function startScanner() {
-        if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({facingMode: "environment"}, {fps: 10, qrbox: 250}, text => {
-            handleResult(text);
-            stopScanner();
-        }).catch(()=>{});
-    }
-    function stopScanner() { if(html5QrCode && html5QrCode.isScanning) html5QrCode.stop(); }
+    
+let scanner = new Html5Qrcode("reader");
 
-    function handleResult(text) {
-        document.getElementById('reader').style.display = 'none';
-        document.getElementById('res_box').style.display = 'block';
-        document.getElementById('res_text').innerText = text;
-        const btnContainer = document.getElementById('action_btn_container');
-        btnContainer.innerHTML = "";
-
+function startScanner() {
+    const config = { 
+        fps: 15, 
+        qrbox: { width: 250, height: 250 },
         
-        if(text.startsWith("http")) {
-            const openBtn = document.createElement('button');
-            openBtn.className = "btn l-btn";
-            openBtn.innerText = "🌐 Open Profile / Link";
-            openBtn.onclick = () => window.open(text, '_blank');
-            btnContainer.appendChild(openBtn);
+        experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true 
         }
-    }
+    };
+    
+    scanner.start({ facingMode: "environment" }, config, t => handleResult(t))
+    .catch(err => console.error("Camera error:", err));
+}
 
-    function resetScanner() {
-        document.getElementById('res_box').style.display = 'none';
-        document.getElementById('reader').style.display = 'block';
-        startScanner();
-    }
 
-    document.getElementById('file_in').addEventListener('change', e => {
-        const file = e.target.files[0];
-        if(!file) return;
-        const qrTemp = new Html5Qrcode("reader");
-        qrTemp.scanFile(file, true).then(text => handleResult(text)).catch(() => alert("No QR found!"));
+document.getElementById('file_in').addEventListener('change', e => {
+    if (e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    
+    
+    scanner.scanFile(file, true)
+    .then(text => {
+        handleResult(text);
+    })
+    .catch(err => {
+        console.error(err);
+        
+        alert("কিউআর কোড পাওয়া যায়নি। ছবিটা একটু পরিষ্কার করে তুলে আবার চেষ্টা করো অথবা ক্যামেরা দিয়ে সরাসরি স্ক্যান করো।");
     });
+});
+
+function handleResult(text) {
+    
+    if(scanner.isScanning) {
+        scanner.stop().catch(err => console.error(err));
+    }
+    
+    document.getElementById('reader').style.display = 'none';
+    document.getElementById('res_box').style.display = 'block';
+    document.getElementById('res_text').innerText = text;
+    
+    const act = document.getElementById('scan_action');
+    act.innerHTML = ""; 
+
+    
+    if (text.toLowerCase().startsWith("http") || text.toLowerCase().startsWith("www")) {
+        let finalUrl = text.startsWith("http") ? text : "https://" + text;
+        const b = document.createElement('button');
+        b.className = "btn l-btn";
+        b.innerText = "🌐 Open Website Link";
+        b.style.marginTop = "10px";
+        b.onclick = () => window.open(finalUrl, '_blank');
+        act.appendChild(b);
+    }
+}
 </script>
 </body>
 </html>
